@@ -4,4 +4,5 @@ langchain-groq
 langgraph
 pydantic
 python-dotenv
-slack-bolt
+python-telegram-bot
+sqlalchemy

@@ -1,81 +1,70 @@
-import { useState } from 'react'
+import React from 'react';
+import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { BackgroundRippleEffect } from "@/components/ui/background-ripple-effect";
+import { Users, LayoutDashboard, Workflow } from 'lucide-react';
+import MonitorPage from './pages/MonitorPage';
+import WorkflowBuilder from './pages/WorkflowBuilder';
+import AgentsPage from './pages/AgentsPage';
 
-function App() {
-  const [task, setTask] = useState('')
-  const [result, setResult] = useState<any>(null)
-  const [loading, setLoading] = useState(false)
-
-  const runWorkflow = async () => {
-    setLoading(true)
-    setResult(null)
-    try {
-      const response = await fetch('http://127.0.0.1:8000/api/workflow', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ task_description: task })
-      })
-      const data = await response.json()
-      setResult(data)
-    } catch (error) {
-      console.error(error)
-      setResult({ error: "Failed to connect to backend." })
-    }
-    setLoading(false)
-  }
+function Sidebar() {
+  const location = useLocation();
+  const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto', fontFamily: 'sans-serif' }}>
-      <h1>AI Agent Orchestration Platform</h1>
-      <p>Submit a task to the Supervisor Agent to kick off the multi-agent workflow.</p>
-      
-      <div style={{ marginBottom: '1rem' }}>
-        <textarea 
-          style={{ width: '100%', height: '100px', padding: '0.5rem', fontFamily: 'inherit' }}
-          value={task}
-          onChange={(e) => setTask(e.target.value)}
-          placeholder="e.g. Research the impact of AI on software engineering and write a short summary."
-        />
+    <div className="w-64 border-r border-nova-surface-alt bg-nova-surface shadow-sm h-full flex flex-col pt-8 z-20">
+      <div className="px-6 mb-8">
+        <h1 className="text-nova-text font-bold tracking-widest text-lg">AI ORCHESTRATOR</h1>
+        <p className="text-nova-text-muted text-xs mt-1 uppercase tracking-widest">Payment Recovery</p>
       </div>
       
-      <button 
-        onClick={runWorkflow}
-        disabled={loading || !task.trim()}
-        style={{ 
-          padding: '0.5rem 1rem', 
-          background: loading ? '#ccc' : '#0070f3', 
-          color: 'white', 
-          border: 'none', 
-          borderRadius: '4px', 
-          cursor: loading ? 'not-allowed' : 'pointer' 
-        }}
-      >
-        {loading ? 'Running Workflow (this may take a few seconds)...' : 'Run Workflow'}
-      </button>
-
-      {result && (
-        <div style={{ marginTop: '2rem', padding: '1rem', background: '#f9f9f9', borderRadius: '4px', border: '1px solid #ddd' }}>
-          <h2>Workflow Result</h2>
-          {result.error ? (
-            <p style={{ color: 'red' }}>{result.error}</p>
-          ) : (
-            <>
-              <h3>Final Output</h3>
-              <div style={{ whiteSpace: 'pre-wrap', background: '#fff', padding: '1rem', border: '1px solid #eee' }}>
-                {result.final_result}
-              </div>
-              
-              <details style={{ marginTop: '1rem' }}>
-                <summary style={{ cursor: 'pointer', fontWeight: 'bold' }}>View Full Workflow State</summary>
-                <pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.85rem', background: '#eee', padding: '1rem', overflowX: 'auto', marginTop: '0.5rem' }}>
-                  {JSON.stringify(result.full_state_snapshot, null, 2)}
-                </pre>
-              </details>
-            </>
-          )}
+      <nav className="flex-1 px-4 flex flex-col gap-2">
+        <Link to="/" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${isActive('/') ? 'bg-nova-primary/10 text-nova-primary border border-nova-primary/30' : 'text-nova-text-muted hover:text-nova-text hover:bg-nova-surface-alt'}`}>
+          <LayoutDashboard className="w-5 h-5" />
+          Monitor
+        </Link>
+        <Link to="/agents" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${isActive('/agents') ? 'bg-nova-primary/10 text-nova-primary border border-nova-primary/30' : 'text-nova-text-muted hover:text-nova-text hover:bg-nova-surface-alt'}`}>
+          <Users className="w-5 h-5" />
+          Agents
+        </Link>
+        <Link to="/builder" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${isActive('/builder') ? 'bg-nova-primary/10 text-nova-primary border border-nova-primary/30' : 'text-nova-text-muted hover:text-nova-text hover:bg-nova-surface-alt'}`}>
+          <Workflow className="w-5 h-5" />
+          Workflow Builder
+        </Link>
+      </nav>
+      
+      <div className="p-6 mt-auto">
+        <div className="flex items-center gap-3">
+          <div className="w-2 h-2 bg-nova-success rounded-full animate-pulse shadow-[0_0_10px_var(--color-success)]" />
+          <span className="text-nova-text-muted text-sm font-mono">System Online</span>
         </div>
-      )}
+      </div>
     </div>
-  )
+  );
 }
 
-export default App
+export default function App() {
+  return (
+    <BrowserRouter>
+      <div className="relative h-screen w-screen bg-nova-bg font-sans overflow-hidden flex">
+        {/* Persistent Background Effect */}
+        <div className="absolute inset-0 pointer-events-none opacity-20 z-0">
+          <BackgroundRippleEffect />
+        </div>
+        
+        {/* Navigation Sidebar */}
+        <div className="relative z-10 h-full">
+          <Sidebar />
+        </div>
+
+        {/* Main Content Area */}
+        <div className="relative z-10 flex-1 h-full p-6 overflow-auto text-nova-text">
+          <Routes>
+            <Route path="/" element={<MonitorPage />} />
+            <Route path="/agents" element={<AgentsPage />} />
+            <Route path="/builder" element={<WorkflowBuilder />} />
+          </Routes>
+        </div>
+      </div>
+    </BrowserRouter>
+  );
+}
