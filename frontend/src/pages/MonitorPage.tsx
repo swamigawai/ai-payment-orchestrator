@@ -105,32 +105,19 @@ export default function MonitorPage() {
         <div className="bg-nova-surface p-6 rounded-xl border border-nova-surface-alt shadow-md mb-6">
           <h2 className="text-xl font-bold text-nova-text mb-2">Simulate Event</h2>
           <p className="text-sm text-nova-text-muted mb-4">Trigger a mock payment failure to test the playbook.</p>
-          <div className="flex gap-4 mb-4">
+          <div className="flex gap-4">
             <input 
               className="flex-1 bg-nova-bg text-nova-text p-4 rounded-lg border border-nova-surface-alt focus:border-nova-primary focus:outline-none font-mono text-sm placeholder-nova-text-muted/50 transition-colors"
               value={taskDesc}
               onChange={(e) => setTaskDesc(e.target.value)}
             />
             <button 
-              className="bg-nova-primary hover:bg-nova-primary-dark text-white font-bold py-4 px-8 rounded-lg border border-nova-primary-dark transition-all disabled:opacity-50 shadow-sm whitespace-nowrap"
+              className="bg-nova-primary hover:bg-nova-primary-dark text-white font-bold py-4 px-8 rounded-lg border border-nova-primary-dark transition-all disabled:opacity-50 shadow-sm"
               onClick={runWorkflow}
               disabled={loading}
             >
               {loading ? "Simulating..." : "Trigger Playbook"}
             </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <span className="text-xs font-bold uppercase text-nova-text-muted mt-2 mr-2">Quick Scenarios:</span>
-            {exampleEvents.map((ev, idx) => (
-                <button 
-                  key={idx}
-                  onClick={() => setTaskDesc(ev)}
-                  className="text-xs bg-nova-surface-alt hover:bg-nova-primary/20 hover:text-nova-primary text-nova-text-muted border border-nova-surface-alt hover:border-nova-primary/50 px-3 py-1.5 rounded-full transition-colors truncate max-w-[250px]"
-                  title={ev}
-                >
-                  {ev}
-                </button>
-            ))}
           </div>
         </div>
 
