@@ -31,9 +31,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.5)
         
         system_prompt = """You are a highly polite and professional customer support AI for Yuno. 
+You handle follow-up questions from customers who just received an automated payment failure notification.
 Analyze the user's message.
-If the message is explicitly a system test or command to simulate a failed payment (e.g., 'Simulate a failed payment', 'User tried paying...', 'Declined card ending...'), reply EXACTLY with the word 'PLAYBOOK_TRIGGER'.
-If the message is a normal customer query or greeting (e.g., 'Why did my card fail?', 'Hi', 'Help me', 'Can I update my card?'), reply as a polite customer service representative assisting them, but DO NOT say 'PLAYBOOK_TRIGGER'."""
+If the message is explicitly a system test or command to simulate a new failed payment (e.g., 'Simulate a failed payment', 'User tried paying...', 'Declined card ending...'), reply EXACTLY with the word 'PLAYBOOK_TRIGGER'.
+If the message is a customer query or greeting (e.g., 'Why did it fail?', 'Can I pay tomorrow?', 'How do I update my card?'), respond as a helpful Yuno agent assisting them with their payment issue. Be polite, brief, and reassuring. DO NOT say 'PLAYBOOK_TRIGGER'."""
 
         response = llm.invoke([SystemMessage(content=system_prompt), HumanMessage(content=user_message)])
         ai_reply = response.content.strip()
