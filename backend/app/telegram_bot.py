@@ -12,10 +12,16 @@ telegram_app = None
 if TELEGRAM_TOKEN:
     telegram_app = Application.builder().token(TELEGRAM_TOKEN).build()
 
+GLOBAL_CHAT_ID = None
+
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Hello! Send me a simulated payment failure, and I'll run the Recovery Playbook!")
+    global GLOBAL_CHAT_ID
+    GLOBAL_CHAT_ID = update.effective_chat.id
+    await update.message.reply_text("Hello! I am connected to the orchestrator. Trigger a playbook from the website, and I will send the recovery message here!")
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global GLOBAL_CHAT_ID
+    GLOBAL_CHAT_ID = update.effective_chat.id
     user_message = update.message.text
     chat_id = update.effective_chat.id
 

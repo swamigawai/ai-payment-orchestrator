@@ -146,7 +146,17 @@ async def run_workflow(request: TaskRequest, db: Session = Depends(get_db)):
                 final_state.update(state_update)
 
         run_record.status = "COMPLETED"
-        run_record.final_result = final_state.get("final_result")
+        final_msg = final_state.get("final_message") or final_state.get("draft_message")
+        run_record.final_result = final_msg
+        
+        # Send to Telegram if a user has connected to the bot
+        import app.telegram_bot as tb
+        if tb.telegram_app and tb.GLOBAL_CHAT_ID and final_msg:
+            try:
+                await tb.telegram_app.bot.send_message(chat_id=tb.GLOBAL_CHAT_ID, text=final_msg)
+            except Exception as e:
+                print(f"Failed to send telegram message: {e}")
+
         await manager.broadcast({"run_id": run_record.id, "agent": "system", "update": {"status": "Completed"}})
         
     except Exception as e:
