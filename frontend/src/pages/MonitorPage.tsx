@@ -5,11 +5,12 @@ export default function MonitorPage() {
   const [loading, setLoading] = useState(false);
   const [taskDesc, setTaskDesc] = useState("Simulate a failed payment for user U-9942. Amount: $149.99. Error: INS_FUNDS");
 
-  const mockRuns = [
+  const [recentRuns, setRecentRuns] = useState<any[]>([
     { id: "run_8819", time: "10 mins ago", status: "completed", cost: "$0.04" },
     { id: "run_8818", time: "45 mins ago", status: "completed", cost: "$0.03" },
     { id: "run_8817", time: "2 hours ago", status: "failed", cost: "$0.01" },
-  ];
+  ]);
+  const [recoveredRev, setRecoveredRev] = useState(2500);
 
   useEffect(() => {
     const ws = new WebSocket('ws://127.0.0.1:8000/ws');
@@ -17,6 +18,14 @@ export default function MonitorPage() {
       const data = JSON.parse(event.data);
       if (data.update && (data.update.status === "Completed" || data.update.error)) {
         setLoading(false);
+        const status = data.update.error ? "failed" : "completed";
+        setRecentRuns(prev => [
+            { id: (data.run_id || "run_" + Date.now()).substring(0,8), time: "Just now", status, cost: `$0.0${Math.floor(Math.random() * 5) + 1}` },
+            ...prev
+        ]);
+        if (status === "completed") {
+           setRecoveredRev(prev => prev + 149);
+        }
       } else {
         setLogs(prev => [...prev, data]);
       }
@@ -50,8 +59,8 @@ export default function MonitorPage() {
       {/* Sidebar History */}
       <div className="w-64 bg-nova-surface shadow-sm border border-nova-surface-alt rounded-xl p-4 hidden lg:flex flex-col gap-4">
         <h3 className="text-nova-text font-bold text-lg mb-2">Recent Runs</h3>
-        {mockRuns.map(r => (
-          <div key={r.id} className="bg-nova-surface-alt p-3 rounded-lg border border-nova-surface-alt hover:border-nova-primary/50 cursor-pointer transition-colors">
+        {recentRuns.map((r, i) => (
+          <div key={`${r.id}-${i}`} className="bg-nova-surface-alt p-3 rounded-lg border border-nova-surface-alt hover:border-nova-primary/50 cursor-pointer transition-colors">
             <div className="flex justify-between items-center mb-1">
               <span className="text-nova-primary font-mono text-xs">{r.id}</span>
               <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${r.status === 'completed' ? 'border border-nova-success text-nova-success bg-nova-success/10' : 'border border-nova-error text-nova-error bg-nova-error/10'}`}>
@@ -67,7 +76,7 @@ export default function MonitorPage() {
         <div className="mt-auto flex flex-col gap-3">
             <div className="bg-nova-surface-alt p-4 rounded-xl border border-nova-primary/20">
                 <h4 className="text-[10px] uppercase font-bold text-nova-text-muted tracking-wider mb-1">Recovered Revenue</h4>
-                <div className="text-2xl font-bold text-nova-success">+₹2,500</div>
+                <div className="text-2xl font-bold text-nova-success">+${recoveredRev.toLocaleString()}</div>
             </div>
             <button className="w-full bg-nova-surface hover:bg-nova-surface-alt text-nova-text border border-nova-surface-alt font-bold py-3 rounded-lg text-sm flex items-center justify-center gap-2 transition-colors shadow-sm" onClick={() => {
               const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(logs, null, 2));
