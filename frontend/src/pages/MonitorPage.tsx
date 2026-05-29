@@ -119,10 +119,8 @@ export default function MonitorPage() {
         {/* Log Viewer */}
         <div className="w-full font-mono text-[13px] bg-nova-surface shadow-md rounded-xl overflow-hidden border border-nova-surface-alt flex-1 flex flex-col min-h-0">
           <div className="flex items-center gap-2 bg-nova-surface-alt px-4 py-3 border-b border-nova-surface-alt">
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-nova-error" />
-              <div className="h-3 w-3 rounded-full bg-nova-warning" />
-              <div className="h-3 w-3 rounded-full bg-nova-success" />
+            <div className="flex items-center gap-2 w-[52px]">
+              {/* Removed Mac dots */}
             </div>
             <div className="flex-1 text-center">
               <span className="truncate text-xs font-sans text-nova-text-muted font-medium">
