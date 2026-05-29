@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Settings, ShieldCheck, MessageSquare, MapPin, Database, ServerCog, Plus } from 'lucide-react';
+import { Settings, ShieldCheck, MessageSquare, MapPin, Database, ServerCog, Plus, X, Save } from 'lucide-react';
 
-const agents = [
+const initialAgents = [
   {
     id: 'event_ingestor',
     name: 'Event Ingestor',
@@ -53,17 +53,61 @@ const agents = [
 ];
 
 export default function AgentsPage() {
+  const [agents, setAgents] = useState(initialAgents);
   const [activeAgent, setActiveAgent] = useState(agents[0]);
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingAgent, setEditingAgent] = useState<any>(null); // null means creating
+
+  const handleOpenEdit = () => {
+    setEditingAgent(activeAgent);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenCreate = () => {
+    setEditingAgent(null);
+    setIsModalOpen(true);
+  };
+
+  const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const newName = formData.get('name') as string;
+    const newModel = formData.get('model') as string;
+    const newPrompt = formData.get('prompt') as string;
+    
+    if (editingAgent) {
+      const updatedAgents = agents.map(a => 
+        a.id === editingAgent.id 
+          ? { ...a, name: newName, model: newModel, prompt: newPrompt } 
+          : a
+      );
+      setAgents(updatedAgents);
+      setActiveAgent(updatedAgents.find(a => a.id === editingAgent.id)!);
+    } else {
+      const newAgent = {
+        id: `agent_${Date.now()}`,
+        name: newName,
+        icon: <Settings className="w-6 h-6 text-nova-primary" />,
+        role: 'Custom user-defined agent.',
+        model: newModel,
+        prompt: newPrompt
+      };
+      setAgents([...agents, newAgent]);
+      setActiveAgent(newAgent);
+    }
+    setIsModalOpen(false);
+  };
 
   return (
-    <div className="flex w-full h-full gap-6">
+    <div className="flex w-full h-full gap-6 relative">
       <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 h-max">
         <div className="col-span-full flex justify-between items-end mb-2">
             <div>
                 <h2 className="text-2xl font-bold text-nova-text">Playbook Agents</h2>
                 <p className="text-sm text-nova-text-muted">Configure your autonomous workforce.</p>
             </div>
-            <button className="bg-nova-primary hover:bg-nova-primary-dark text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors">
+            <button onClick={handleOpenCreate} className="bg-nova-primary hover:bg-nova-primary-dark text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors shadow-sm">
                 <Plus className="w-4 h-4" />
                 Create Agent
             </button>
@@ -71,7 +115,7 @@ export default function AgentsPage() {
         {agents.map(a => (
           <div 
             key={a.id} 
-            className={`p-6 rounded-xl border cursor-pointer transition-all ${a.id === activeAgent.id ? 'bg-nova-surface-alt border-nova-primary scale-[1.02]' : 'bg-nova-surface border-nova-surface-alt hover:bg-nova-surface-alt/80'}`}
+            className={`p-6 rounded-xl border cursor-pointer transition-all shadow-sm ${a.id === activeAgent.id ? 'bg-nova-surface border-nova-primary shadow-md scale-[1.02]' : 'bg-nova-surface border-nova-surface-alt hover:shadow-md'}`}
             onClick={() => setActiveAgent(a)}
           >
             <div className="flex items-center gap-4 mb-4">
@@ -114,11 +158,73 @@ export default function AgentsPage() {
         </div>
         
         <div className="mt-6 pt-6 border-t border-nova-surface-alt flex justify-end">
-          <button className="px-6 py-2 bg-nova-surface-alt hover:bg-nova-primary/20 hover:text-nova-primary text-nova-text border border-nova-surface-alt hover:border-nova-primary rounded-lg text-sm font-bold transition-all">
+          <button onClick={handleOpenEdit} className="px-6 py-2 bg-nova-surface-alt hover:bg-nova-primary/10 hover:text-nova-primary text-nova-text border border-nova-surface-alt hover:border-nova-primary rounded-lg text-sm font-bold transition-all">
             Edit Agent Config
           </button>
         </div>
       </div>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-nova-text/20 backdrop-blur-sm">
+          <div className="bg-nova-surface w-[500px] rounded-xl shadow-2xl border border-nova-surface-alt flex flex-col">
+            <div className="flex justify-between items-center p-6 border-b border-nova-surface-alt">
+              <h2 className="text-xl font-bold text-nova-text">{editingAgent ? "Edit Agent Config" : "Create New Agent"}</h2>
+              <button onClick={() => setIsModalOpen(false)} className="text-nova-text-muted hover:text-nova-error transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleSave} className="p-6 flex flex-col gap-4">
+              <div>
+                <label className="block text-xs font-bold uppercase text-nova-text-muted mb-1">Agent Name</label>
+                <input 
+                  name="name" 
+                  defaultValue={editingAgent?.name || ''} 
+                  required 
+                  placeholder="e.g. Fraud Analyst Agent"
+                  className="w-full bg-nova-bg border border-nova-surface-alt rounded-lg p-3 text-sm text-nova-text focus:outline-none focus:border-nova-primary transition-colors" 
+                />
+              </div>
+              
+              <div>
+                <label className="block text-xs font-bold uppercase text-nova-text-muted mb-1">LLM Model</label>
+                <select 
+                  name="model" 
+                  defaultValue={editingAgent?.model || 'llama-3.3-70b-versatile'} 
+                  className="w-full bg-nova-bg border border-nova-surface-alt rounded-lg p-3 text-sm text-nova-text focus:outline-none focus:border-nova-primary transition-colors"
+                >
+                  <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile</option>
+                  <option value="gpt-4o">gpt-4o</option>
+                  <option value="claude-3-opus">claude-3-opus</option>
+                </select>
+              </div>
+
+              <div className="flex-1">
+                <label className="block text-xs font-bold uppercase text-nova-text-muted mb-1">System Prompt</label>
+                <textarea 
+                  name="prompt" 
+                  defaultValue={editingAgent?.prompt || ''} 
+                  required 
+                  rows={6}
+                  placeholder="You are an AI agent designed to..."
+                  className="w-full bg-nova-bg border border-nova-surface-alt rounded-lg p-3 font-mono text-[13px] text-nova-info focus:outline-none focus:border-nova-primary transition-colors resize-none" 
+                />
+              </div>
+
+              <div className="mt-4 flex justify-end gap-3">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 rounded-lg text-nova-text font-bold hover:bg-nova-surface-alt transition-colors">
+                  Cancel
+                </button>
+                <button type="submit" className="bg-nova-primary hover:bg-nova-primary-dark text-white px-6 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors shadow-sm">
+                  <Save className="w-4 h-4" />
+                  {editingAgent ? "Save Changes" : "Deploy Agent"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
