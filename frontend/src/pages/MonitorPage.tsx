@@ -95,21 +95,6 @@ export default function MonitorPage() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Live Analytics Top Bar */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-nova-surface p-4 rounded-xl border border-nova-surface-alt shadow-sm flex items-center justify-between">
-            <span className="text-nova-text-muted text-sm font-bold uppercase">Success Rate</span>
-            <span className="text-nova-success text-xl font-bold">94.2%</span>
-          </div>
-          <div className="bg-nova-surface p-4 rounded-xl border border-nova-surface-alt shadow-sm flex items-center justify-between">
-            <span className="text-nova-text-muted text-sm font-bold uppercase">Active Agents</span>
-            <span className="text-nova-primary text-xl font-bold">6</span>
-          </div>
-          <div className="bg-nova-surface p-4 rounded-xl border border-nova-surface-alt shadow-sm flex items-center justify-between">
-            <span className="text-nova-text-muted text-sm font-bold uppercase">Tokens Used</span>
-            <span className="text-nova-info text-xl font-bold">12,450</span>
-          </div>
-        </div>
 
         <div className="bg-nova-surface p-6 rounded-xl border border-nova-surface-alt shadow-md mb-6">
           <h2 className="text-xl font-bold text-nova-text mb-2">Simulate Event</h2>
