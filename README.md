@@ -29,6 +29,21 @@ Yuno is an automated pipeline that ingests raw bank webhooks and transforms them
 * **Drafting:** The Customer Agent drafts a localized, empathetic, and highly personalized recovery message pulling contextual data from the original event.
 * **Compliance Audit:** Before any message is dispatched, an independent Compliance Agent evaluates the draft. If it detects a policy violation (like raw error codes or aggressive language), it sends the draft back for revision, creating a secure feedback loop with zero hallucination leakage.
 
+### System Flow
+```mermaid
+graph TD
+    A[Raw Webhook Event] -->|JSON| B(📥 Event Ingestor)
+    B --> C(🔍 Reason Classifier)
+    C --> D(🗺️ Channel Planner)
+    D --> E(✍️ Customer Agent)
+    E -->|Drafts Message| F{🛡️ Compliance Agent}
+    F -->|REVISION_REQUIRED| E
+    F -->|APPROVED| G[🟢 Dispatch to Telegram]
+    
+    classDef default fill:#1C1C1C,stroke:#4CAF50,stroke-width:2px,color:white;
+    classDef safe fill:#2e7d32,stroke:#4CAF50,stroke-width:2px,color:white;
+    class G safe;
+```
 ## Tech Stack
 Our architecture is built for speed, fault tolerance, and deep real-time observability.
 
@@ -61,7 +76,12 @@ python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
-*Note: You must create a `.env` file in the `backend` directory containing your `GROQ_API_KEY` and `TELEGRAM_TOKEN` prior to initialization.*
+*Note: You must create a `.env` file in the `backend` directory containing the following variables prior to initialization:*
+
+| Variable | Description |
+|---|---|
+| `GROQ_API_KEY` | Required for the Llama 3.3 LLM inference. |
+| `TELEGRAM_TOKEN` | Required to route messages to the customer support bot. |
 
 ```bash
 # Initialize the FastAPI server and Telegram polling service
@@ -76,3 +96,10 @@ npm run dev
 ```
 
 Navigate your browser to `http://localhost:5173` to access the Orchestration Dashboard.
+
+---
+
+## 🔮 Future Roadmap
+
+- [ ] **Human-in-the-Loop:** Route payments > $1000 to a Slack channel for manual human approval.
+- [ ] **Multi-Channel Fallback:** Integrate Twilio SMS if the Telegram message is left on "read."
