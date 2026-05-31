@@ -8,6 +8,14 @@
 
 An enterprise-grade, autonomous multi-agent system designed to combat involuntary churn and recover failed payments through context-aware, highly personalized customer outreach.
 
+<br/>
+
+<video width="100%" autoplay loop muted playsinline>
+  <source src="./assets/Demo.1.mp4" type="video/mp4">
+</video>
+
+<br/>
+
 ---
 
 ## The Solution
