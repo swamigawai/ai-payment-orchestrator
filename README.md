@@ -42,17 +42,7 @@ Our architecture is built for speed, fault tolerance, and deep real-time observa
 | **Integrations**| <img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white" height="48" alt="Telegram" /> | Powers the conversational AI Intent Router for Tier-1 customer support. |
 | **Resilience** | <img src="https://img.shields.io/badge/Tenacity-000000?style=for-the-badge&logo=python&logoColor=white" height="48" alt="Tenacity" /> | Exponential backoff retry decorators ensuring high availability during API turbulence. |
 
-## Visuals
 
-| Live Execution Monitor | Workflow Builder |
-| :---: | :---: |
-| *(Insert Monitor Screenshot Here)* | *(Insert Workflow Screenshot Here)* |
-
-| Agent Configuration | Telegram Integration |
-| :---: | :---: |
-| *(Insert Config Screenshot Here)* | *(Insert Telegram Screenshot Here)* |
-
----
 ## Local Setup & Installation
 
 ### Backend Environment
