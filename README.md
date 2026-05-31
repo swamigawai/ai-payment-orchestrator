@@ -26,12 +26,12 @@ Our architecture is built for speed, fault tolerance, and deep real-time observa
 
 | Component | Technology | Description |
 | :--- | :--- | :--- |
-| **Frontend** | React, Vite, TailwindCSS | Real-time orchestration dashboard and Live Execution Monitor via WebSockets. |
-| **Backend** | Python, FastAPI, SQLAlchemy | High-performance microservices handling API routing and state management. |
-| **Agent Architecture** | LangGraph, LangChain | Deterministic state machine orchestrating 5 specialized micro-agents. |
-| **LLM Inference** | Groq (Llama-3.3-70b-versatile) | Ultra-low latency inference for high-speed parsing, reasoning, and drafting. |
-| **External Integrations**| Python-Telegram-Bot | Powers the conversational AI Intent Router for Tier-1 customer support. |
-| **Resilience** | Tenacity | Exponential backoff retry decorators ensuring high availability during API turbulence. |
+| **Frontend** | <img src="https://skillicons.dev/icons?i=react,vite,tailwind" height="48" alt="React Vite Tailwind" /> | Real-time orchestration dashboard and Live Execution Monitor via WebSockets. |
+| **Backend** | <img src="https://skillicons.dev/icons?i=python,fastapi,sqlite" height="48" alt="Python FastAPI SQLite" /> | High-performance microservices handling API routing and state management. |
+| **Agent Architecture** | <img src="https://img.shields.io/badge/LangGraph-1C1C1C?style=for-the-badge&logo=langchain&logoColor=white" height="48" alt="LangGraph" /> | Deterministic state machine orchestrating 5 specialized micro-agents. |
+| **LLM Inference** | <img src="https://img.shields.io/badge/Groq_Llama_3-F56B2A?style=for-the-badge&logo=meta&logoColor=white" height="48" alt="Groq Llama 3" /> | Ultra-low latency inference for high-speed parsing, reasoning, and drafting. |
+| **Integrations**| <img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white" height="48" alt="Telegram" /> | Powers the conversational AI Intent Router for Tier-1 customer support. |
+| **Resilience** | <img src="https://img.shields.io/badge/Tenacity-000000?style=for-the-badge&logo=python&logoColor=white" height="48" alt="Tenacity" /> | Exponential backoff retry decorators ensuring high availability during API turbulence. |
 
 ## Visuals
 
