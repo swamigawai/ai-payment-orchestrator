@@ -10,52 +10,41 @@ An enterprise-grade, autonomous multi-agent system designed to combat involuntar
 
 ---
 
-## 1. Executive Summary & The Business Problem
+## The Solution
+Yuno is an automated pipeline that ingests raw bank webhooks and transforms them into precision-targeted, actionable recovery messages. We treat payment failure recovery as a deterministic state-machine problem, not just a static email sequence.
 
-Involuntary churn—the loss of customers due to failed payments from expired cards, insufficient funds, or bank declines—costs digital businesses billions of dollars annually. Traditional systems rely on static retry logic and generic, automated email sequences that suffer from exceptionally low conversion rates.
+## How it works
 
-**The Solution:** Yuno provides a specialized, multi-agent AI workforce that ingests raw bank webhooks, determines the precise business context behind the payment failure, selects the optimal recovery channel based on historical heuristics, and drafts a hyper-personalized recovery message. Crucially, the system operates under strict enterprise compliance constraints, ensuring that automated outreach remains both effective and legally sound.
+* **Ingestion:** The system intercepts raw payment failure webhooks and normalizes them into a strict, validated Pydantic state, stripping out sensitive Personal Identifiable Information (PII).
+* **Classification:** An AI Reason Classifier analyzes internal bank error codes (e.g., `INS_FUNDS`, `DO_NOT_HONOR`) and translates them into actionable human business logic in under 5 seconds.
+* **Routing:** The Channel Planner dynamically selects the optimal recovery strategy based on user geography and the severity of the failure (e.g., routing to Telegram for immediate action vs. Email for standard follow-ups).
+* **Drafting:** The Customer Agent drafts a localized, empathetic, and highly personalized recovery message pulling contextual data from the original event.
+* **Compliance Audit:** Before any message is dispatched, an independent Compliance Agent evaluates the draft. If it detects a policy violation (like raw error codes or aggressive language), it sends the draft back for revision, creating a secure feedback loop with zero hallucination leakage.
 
----
+## Tech Stack
+Our architecture is built for speed, fault tolerance, and deep real-time observability.
 
-## 2. Multi-Agent Architecture (LangGraph)
+| Component | Technology | Description |
+| :--- | :--- | :--- |
+| **Frontend** | React, Vite, TailwindCSS | Real-time orchestration dashboard and Live Execution Monitor via WebSockets. |
+| **Backend** | Python, FastAPI, SQLAlchemy | High-performance microservices handling API routing and state management. |
+| **Agent Architecture** | LangGraph, LangChain | Deterministic state machine orchestrating 5 specialized micro-agents. |
+| **LLM Inference** | Groq (Llama-3.3-70b-versatile) | Ultra-low latency inference for high-speed parsing, reasoning, and drafting. |
+| **External Integrations**| Python-Telegram-Bot | Powers the conversational AI Intent Router for Tier-1 customer support. |
+| **Resilience** | Tenacity | Exponential backoff retry decorators ensuring high availability during API turbulence. |
 
-To ensure scalability and maintainability, this platform abandons the brittle approach of monolithic LLM prompts. Instead, it utilizes **LangGraph** to orchestrate a deterministic state machine populated by five specialized micro-agents:
+## Visuals
 
-1. **Event Ingestor:** Normalizes unstructured, raw bank webhooks into a strict, validated Pydantic state, stripping out sensitive Personal Identifiable Information (PII) before it enters the LLM context window.
-2. **Reason Classifier:** Analyzes internal bank error codes (e.g., `INS_FUNDS`, `DO_NOT_HONOR`) and translates them into actionable human business logic.
-3. **Channel Planner:** Dynamically routes the recovery strategy based on user geography, demographic data, and the severity of the failure (e.g., routing to Telegram for immediate action vs. Email for standard follow-ups).
-4. **Customer Agent:** Drafts the localized, empathetic, and actionable recovery message, pulling contextual data from the original event to drive conversion.
-5. **Compliance Agent:** Acts as an independent auditor to enforce safety boundaries.
+| Live Execution Monitor | Workflow Builder |
+| :---: | :---: |
+| *(Insert Monitor Screenshot Here)* | *(Insert Workflow Screenshot Here)* |
 
----
-
-## 3. AI Safety and The Compliance Feedback Loop
-
-Deploying Generative AI in an enterprise production environment requires strict safety rails to prevent hallucination leakage. This architecture implements a **Deterministic Supervisor** alongside a rigorous **Compliance Feedback Loop**.
-
-Before any generated message is dispatched to a customer, it must be intercepted and evaluated by the Compliance Agent. If the Compliance Agent detects a policy violation—such as the inclusion of a raw internal error code, aggressive language, or unapproved claims—it blocks the outbound network request. The draft is then routed back to the Customer Agent accompanied by a `REVISION_REQUIRED` flag and specific correction feedback. The state machine cycles through this loop until the message achieves an `APPROVED` status, guaranteeing zero hallucination leakage to the end user.
-
----
-
-## 4. Production-Ready Features
-
-* **Real-Time Observability via WebSockets:** The React frontend features a Live Execution Monitor, establishing a persistent WebSocket connection to stream millisecond-by-millisecond state transitions from the LangGraph backend. This provides deep observability into the autonomous reasoning process.
-* **Robust Fault Tolerance:** Network requests to external LLM providers are inherently unstable. To mitigate this, all LLM nodes are wrapped in Exponential Backoff Retry decorators using the `Tenacity` framework. Furthermore, the system utilizes custom Regex extraction for deterministic JSON parsing, ensuring high availability even during periods of LLM API turbulence.
-* **Conversational Intent Routing:** The integrated Telegram bot extends beyond one-way automated messaging. It is equipped with an AI Intent Router (powered by `llama-3.3-70b-versatile`) that intercepts customer replies, classifies whether the input is a follow-up query or a system command, and handles the interaction dynamically as a Tier-1 customer support agent.
-
----
-
-## 5. Technical Stack
-
-* **Backend Orchestration:** Python, FastAPI, LangGraph, LangChain, SQLAlchemy
-* **External Integrations:** Python-Telegram-Bot
-* **Frontend Dashboard:** React, Vite, TailwindCSS (Nova Design System)
-* **AI Provider:** Groq (Llama-3.3-70b-versatile) for ultra-low latency inference.
+| Agent Configuration | Telegram Integration |
+| :---: | :---: |
+| *(Insert Config Screenshot Here)* | *(Insert Telegram Screenshot Here)* |
 
 ---
-
-## 6. Local Setup & Installation
+## Local Setup & Installation
 
 ### Backend Environment
 ```bash
@@ -79,6 +68,3 @@ npm run dev
 ```
 
 Navigate your browser to `http://localhost:5173` to access the Orchestration Dashboard.
-
----
-*Architected and developed as a modern, scalable solution for intelligent payment recovery.*
