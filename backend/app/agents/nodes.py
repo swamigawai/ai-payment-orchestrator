@@ -84,24 +84,26 @@ async def customer_agent_node(state: WorkflowState):
     reason = state.get("failure_reason", "")
     strategy = state.get("strategy", "")
     amount = state.get("amount", 0)
+    task_desc = state.get("task_description", "")
     feedback = state.get("compliance_notes", "")
     
-    system_prompt = """You are the Customer Agent. Generate a concise, highly professional, and empathetic customer-facing message.
+    system_prompt = """You are the Customer Agent. Generate a perfectly balanced, professional, and empathetic customer-facing message.
 Key behaviors:
-- Keep the message brief and to the point (maximum 2-3 short sentences).
+- Provide a detailed but easy-to-read explanation (around 3-5 sentences). Not too short, not a wall of text.
 - Greet the user politely.
-- State that their payment of ${amount} failed and briefly explain why without blaming them (e.g., "declined for security reasons").
-- Provide a single clear, actionable next step (like a secure link).
+- Use specific context from the 'Original Event' (like their user ID, card ending, or specific plan if mentioned) to make the message highly personalized.
+- State that their payment of ${amount} failed and explain the reason contextually without blaming them.
+- Provide a clear, actionable next step based on the strategy.
 - End with a polite sign-off from 'The Yuno Team'.
 Safety:
-- Do not expose internal error codes or technical implementation details."""
+- Do not expose raw internal error codes (translate them to customer-friendly terms)."""
 
     if feedback and state.get("compliance_decision") == "REVISION_REQUIRED":
          system_prompt += f"\nWARNING: Your previous draft was rejected by Compliance. You MUST fix it based on this feedback: {feedback}"
          
     prompt = [
         SystemMessage(content=system_prompt),
-        HumanMessage(content=f"Reason: {reason}\nStrategy: {strategy}\nAmount: {amount}")
+        HumanMessage(content=f"Original Event: {task_desc}\nReason: {reason}\nStrategy: {strategy}\nAmount: {amount}")
     ]
     response = await llm.ainvoke(prompt)
     return {"draft_message": response.content}
