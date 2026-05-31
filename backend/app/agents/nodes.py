@@ -1,14 +1,24 @@
 import os
 import json
+import re
 from dotenv import load_dotenv
 load_dotenv()
 from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_groq import ChatGroq
 from app.agents.state import WorkflowState
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 def get_llm():
     return ChatGroq(model="llama-3.3-70b-versatile", temperature=0.1)
 
+def extract_json(text: str) -> dict:
+    """Robustly extracts a JSON object from a potentially messy LLM string."""
+    match = re.search(r'\{.*\}', text, re.DOTALL)
+    if match:
+        return json.loads(match.group(0))
+    return json.loads(text)
+
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
 async def event_ingestor_node(state: WorkflowState):
     llm = get_llm()
     task = state.get("task_description", "")
@@ -26,11 +36,12 @@ No markdown or backticks."""),
     ]
     response = await llm.ainvoke(prompt)
     try:
-        data = json.loads(response.content.strip().replace("```json", "").replace("```", ""))
+        data = extract_json(response.content)
         return data
-    except Exception as e:
-        return {"error_code": "parse_failure"}
+    except Exception:
+        raise Exception("JSON parsing failed in event_ingestor, triggering retry")
 
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
 async def reason_classifier_node(state: WorkflowState):
     llm = get_llm()
     err = state.get("error_code", "unknown")
@@ -49,11 +60,12 @@ No markdown or backticks."""),
     ]
     response = await llm.ainvoke(prompt)
     try:
-        data = json.loads(response.content.strip().replace("```json", "").replace("```", ""))
+        data = extract_json(response.content)
         return {"failure_reason": data.get("failure_reason", "unknown"), "recoverable": data.get("recoverable", False)}
-    except:
-        return {"failure_reason": "classification_failed", "recoverable": False}
+    except Exception:
+        raise Exception("JSON parsing failed in reason_classifier, triggering retry")
 
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
 async def recovery_channel_planner_node(state: WorkflowState):
     llm = get_llm()
     reason = state.get("failure_reason", "")
@@ -74,11 +86,12 @@ Output exactly as a valid JSON object with keys: 'strategy' (str) and 'recovery_
     ]
     response = await llm.ainvoke(prompt)
     try:
-        data = json.loads(response.content.strip().replace("```json", "").replace("```", ""))
+        data = extract_json(response.content)
         return {"strategy": data.get("strategy"), "recovery_channel": data.get("recovery_channel", "telegram")}
-    except:
-        return {"strategy": "explain_and_retry", "recovery_channel": "telegram"}
+    except Exception:
+        raise Exception("JSON parsing failed in recovery_channel_planner, triggering retry")
 
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
 async def customer_agent_node(state: WorkflowState):
     llm = get_llm()
     reason = state.get("failure_reason", "")
@@ -108,6 +121,7 @@ Safety:
     response = await llm.ainvoke(prompt)
     return {"draft_message": response.content}
 
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
 async def compliance_agent_node(state: WorkflowState):
     llm = get_llm()
     draft = state.get("draft_message", "")
@@ -125,10 +139,10 @@ Output exactly as a valid JSON object with keys: 'compliance_decision' (APPROVED
     ]
     response = await llm.ainvoke(prompt)
     try:
-        data = json.loads(response.content.strip().replace("```json", "").replace("```", ""))
+        data = extract_json(response.content)
         return {"compliance_decision": data.get("compliance_decision", "APPROVED"), "compliance_notes": data.get("compliance_notes", "")}
-    except:
-        return {"compliance_decision": "APPROVED", "compliance_notes": ""}
+    except Exception:
+        raise Exception("JSON parsing failed in compliance_agent, triggering retry")
 
 async def supervisor_node(state: WorkflowState):
     current = state.get("next_agent")
