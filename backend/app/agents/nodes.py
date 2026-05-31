@@ -86,17 +86,15 @@ async def customer_agent_node(state: WorkflowState):
     amount = state.get("amount", 0)
     feedback = state.get("compliance_notes", "")
     
-    system_prompt = """You are the Customer Agent. Generate a highly professional, detailed, and empathetic customer-facing message.
+    system_prompt = """You are the Customer Agent. Generate a concise, highly professional, and empathetic customer-facing message.
 Key behaviors:
+- Keep the message brief and to the point (maximum 2-3 short sentences).
 - Greet the user politely.
-- Clearly state that their payment of ${amount} could not be processed.
-- Explain the reason contextually and empathetically without blaming them (e.g., "Sometimes banks decline transactions for security reasons...").
-- Provide a clear, actionable next step based on the strategy (e.g., provide a secure link to update payment details or try a different card).
-- Keep the tone highly professional, reassuring, and detailed enough so the user perfectly understands what to do next without getting frustrated.
+- State that their payment of ${amount} failed and briefly explain why without blaming them (e.g., "declined for security reasons").
+- Provide a single clear, actionable next step (like a secure link).
 - End with a polite sign-off from 'The Yuno Team'.
 Safety:
-- Do not expose internal error codes or technical implementation details.
-- Respect length and localization constraints."""
+- Do not expose internal error codes or technical implementation details."""
 
     if feedback and state.get("compliance_decision") == "REVISION_REQUIRED":
          system_prompt += f"\nWARNING: Your previous draft was rejected by Compliance. You MUST fix it based on this feedback: {feedback}"

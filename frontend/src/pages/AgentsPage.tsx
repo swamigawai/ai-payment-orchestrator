@@ -32,7 +32,7 @@ const initialAgents = [
     icon: <MessageSquare className="w-6 h-6 text-nova-primary" />,
     role: 'Draft customer-facing message localized and friendly.',
     model: 'llama-3.3-70b-versatile',
-    prompt: 'You are the Customer Agent. Generate a highly professional, detailed, and empathetic customer-facing message. Greet the user, explain the failure contextually without blame, provide a clear actionable next step, and sign off from The Yuno Team. Do not expose internal error codes.'
+    prompt: 'You are the Customer Agent. Generate a concise, highly professional, and empathetic customer-facing message. Keep it brief (2-3 short sentences), explain the failure contextually without blame, provide a clear actionable next step, and sign off from The Yuno Team. Do not expose internal error codes.'
   },
   {
     id: 'compliance_agent',
